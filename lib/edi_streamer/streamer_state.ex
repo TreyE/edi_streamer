@@ -1,10 +1,10 @@
 defmodule EdiStreamer.StreamerState do
   defstruct [:parse_state, :segment_index, :current_segment_start, :io_index, :fields, :current_field, :raw_segment, :buffer, :io_source, :field_separator, :segment_separator]
 
-  @type state :: :in_end | :in_field | :no_more_input
-  @type segment :: any
-  @type streamer_state :: any
+  @type segment :: %EdiStreamer.Segment{}
+  @type streamer_state :: %EdiStreamer.StreamerState{}
 
+  @spec new(byte, byte, any) :: streamer_state
   def new(f_separator, s_separator, io_thing) do
     %EdiStreamer.StreamerState{
       buffer: <<>>,

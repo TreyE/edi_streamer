@@ -21,6 +21,7 @@ defmodule EdiStreamer.StreamerState do
     }
   end
 
+  @spec as_stream(streamer_state) :: Stream.streamer_state
   def as_stream(state) do
     Stream.resource(
       fn -> state end,

@@ -2,7 +2,19 @@ defmodule EdiStreamer.StreamerState do
   defstruct [:parse_state, :segment_index, :current_segment_start, :io_index, :fields, :current_field, :raw_segment, :buffer, :io_source, :field_separator, :segment_separator]
 
   @type segment :: %EdiStreamer.Segment{}
-  @type streamer_state :: %EdiStreamer.StreamerState{}
+  @type parse_state :: :in_field | :in_end
+  @type streamer_state :: %EdiStreamer.StreamerState{
+    buffer: binary,
+    io_source: any,
+    field_separator: byte,
+    segment_separator: byte,
+    io_index: integer,
+    parse_state: parse_state,
+    current_segment_start: integer,
+    fields: [binary],
+    raw_segment: binary,
+    segment_index: integer
+  }
 
   @spec new(byte, byte, any) :: streamer_state
   def new(f_separator, s_separator, io_thing) do
@@ -29,7 +41,7 @@ defmodule EdiStreamer.StreamerState do
       fn s -> s end)
   end
 
-  @spec step(streamer_state) :: {:halt, streamer_state} | {[segment], streamer_state}
+  @spec step(streamer_state) :: {:halt, streamer_state} | {nonempty_list(segment), streamer_state}
   def step(%EdiStreamer.StreamerState{parse_state: :no_more_input} = state) do
     {:halt, state}
   end

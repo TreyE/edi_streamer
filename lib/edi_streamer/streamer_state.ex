@@ -76,6 +76,7 @@ defmodule EdiStreamer.StreamerState do
                                 segment_index: state.segment_index
                               }
                               new_state = %EdiStreamer.StreamerState{ state |
+                                io_index: state.io_index + 1,
                                 parse_state: :in_field,
                                 buffer: rest,
                                 current_field: first_byte,

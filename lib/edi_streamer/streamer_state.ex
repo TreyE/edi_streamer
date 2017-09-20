@@ -132,7 +132,7 @@ defmodule EdiStreamer.StreamerState do
   end
 
   defp pull_buffer(state) do
-    case :file.read(state.io_source, 512) do
+    case :file.read(state.io_source, 4096) do
       :eof -> {:eof, %EdiStreamer.StreamerState{state | io_source: state.io_source}}
       {:ok, data} -> {:ok, %EdiStreamer.StreamerState{state | io_source: state.io_source, buffer: data}}
       {:error, reason} -> {:error, reason}

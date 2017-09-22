@@ -1,32 +1,35 @@
 defmodule EdiStreamer.DelimiterFinder do
   @spec find_delimiters(any) :: {:ok, binary, binary} | {:error, term}
   def find_delimiters(io_thing) do
-    EdiStreamer.IoAble.rewind(io_thing)
-    case EdiStreamer.IoAble.pread(io_thing, 3, 1) do
+    rewound_io_thing = EdiStreamer.IoAble.rewind(io_thing)
+    {new_io_thing, data} = EdiStreamer.IoAble.pread(rewound_io_thing, 3, 1)
+    case data do
       :eof -> {:error, :eof}
       {:error, io_e} -> {:error, {:io_error, io_e}}
       {:ok, f_sep} ->
-         EdiStreamer.IoAble.rewind(io_thing)
-         find_s_separator(io_thing, f_sep, 0)
+         searchable_io_thing = EdiStreamer.IoAble.rewind(new_io_thing)
+         find_s_separator(searchable_io_thing, f_sep, 0)
     end
   end
 
   defp find_s_separator(io_thing, f_sep, 16) do
-    case EdiStreamer.IoAble.binread(io_thing, 2) do
+    {new_io_thing, data} = EdiStreamer.IoAble.binread(io_thing, 2)
+    case data do
       :eof -> {:error, :eof}
       {:error, io_e} -> {:error, {:io_error, io_e}}
       <<_::8, s_sep::binary>> -> 
-        EdiStreamer.IoAble.rewind(io_thing)
-        {:ok, f_sep, s_sep}
+        rewound_io_thing = EdiStreamer.IoAble.rewind(new_io_thing)
+        {:ok, f_sep, s_sep, rewound_io_thing}
     end
   end
 
   defp find_s_separator(io_thing, f_sep, f_seps_found) do
-    case EdiStreamer.IoAble.binread(io_thing, 1) do
+    {new_io_thing, data} = EdiStreamer.IoAble.binread(io_thing, 1)
+    case data do
       :eof -> {:error, :eof}
       {:error, io_e} -> {:error, {:io_error, io_e}}
-      ^f_sep -> find_s_separator(io_thing, f_sep, f_seps_found + 1)
-      _ -> find_s_separator(io_thing, f_sep, f_seps_found)
+      ^f_sep -> find_s_separator(new_io_thing, f_sep, f_seps_found + 1)
+      _ -> find_s_separator(new_io_thing, f_sep, f_seps_found)
     end
   end
 end

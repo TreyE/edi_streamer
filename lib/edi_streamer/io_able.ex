@@ -12,17 +12,18 @@ end
 defimpl EdiStreamer.IoAble, for: Any do
   def rewind(io_able) do
    :file.position(io_able, 0)
+   io_able
   end
 
   def read_chunk(io_able) do
-    IO.binread(io_able, 4096)
+    {io_able, IO.binread(io_able, 4096)}
   end
 
   def binread(io_able, size) do
-    IO.binread(io_able, size)
+    {io_able, IO.binread(io_able, size)}
   end
 
   def pread(io_able, idx, size) do
-    :file.pread(io_able, idx, size)
+    {io_able, :file.pread(io_able, idx, size)}
   end
 end

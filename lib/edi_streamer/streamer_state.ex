@@ -134,8 +134,8 @@ defmodule EdiStreamer.StreamerState do
   defp pull_buffer(state) do
     case EdiStreamer.IoAble.read_chunk(state.io_source) do
       :eof -> {:eof, %EdiStreamer.StreamerState{state | io_source: state.io_source}}
-      {:ok, data} -> {:ok, %EdiStreamer.StreamerState{state | io_source: state.io_source, buffer: data}}
       {:error, reason} -> {:error, reason}
+      data -> {:ok, %EdiStreamer.StreamerState{state | io_source: state.io_source, buffer: data}}
     end
   end
 

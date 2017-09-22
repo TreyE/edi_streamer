@@ -1,4 +1,5 @@
 defprotocol EdiStreamer.IoAble do
+  @fallback_to_any true
   def rewind(io_able)
 
   def read_chunk(io_able)

@@ -1,5 +1,5 @@
 defmodule EdiStreamer.StreamerState do
-  defstruct [:parse_state, :segment_index, :current_segment_start, :io_index, :fields, :current_field, :raw_segment, :buffer, :io_source, :field_separator, :segment_separator]
+  defstruct [:parse_state, :segment_index, :current_segment_start, :io_index, :fields, :current_field, :raw_segment, :buffer, :io_source, :field_separator, :segment_separator, :sub_delimiter]
 
   @type segment :: %EdiStreamer.Segment{}
   @type parse_state :: :in_field | :in_end
@@ -8,6 +8,7 @@ defmodule EdiStreamer.StreamerState do
     io_source: any,
     field_separator: byte,
     segment_separator: byte,
+    sub_delimiter: byte,
     io_index: integer,
     parse_state: parse_state,
     current_segment_start: integer,
@@ -16,13 +17,14 @@ defmodule EdiStreamer.StreamerState do
     segment_index: integer
   }
 
-  @spec new(byte, byte, any) :: streamer_state
-  def new(f_separator, s_separator, io_thing) do
+  @spec new(byte, byte, byte, any) :: streamer_state
+  def new(f_separator, s_separator, sub_element_delim, io_thing) do
     %EdiStreamer.StreamerState{
       buffer: <<>>,
       io_source: io_thing,
       field_separator: f_separator,
       segment_separator: s_separator,
+      sub_delimiter: sub_element_delim,
       parse_state: :in_field,
       current_segment_start: 0,
       io_index: 0,
@@ -73,7 +75,8 @@ defmodule EdiStreamer.StreamerState do
                                 end_offset: state.io_index - 1,
                                 field_separator: state.field_separator,
                                 segment_separator: state.segment_separator,
-                                segment_index: state.segment_index
+                                segment_index: state.segment_index,
+                                sub_delimiter: state.sub_delimiter
                               }
                               new_state = %EdiStreamer.StreamerState{ state |
                                 io_index: state.io_index + 1,
@@ -105,7 +108,8 @@ defmodule EdiStreamer.StreamerState do
           end_offset: state.io_index,
           field_separator: state.field_separator,
           segment_separator: state.segment_separator,
-          segment_index: state.segment_index
+          segment_index: state.segment_index,
+          sub_delimiter: state.sub_delimiter
         }
         {
           [segment],
@@ -122,7 +126,8 @@ defmodule EdiStreamer.StreamerState do
           end_offset: state.io_index,
           field_separator: state.field_separator,
           segment_separator: state.segment_separator,
-          segment_index: state.segment_index
+          segment_index: state.segment_index,
+          sub_delimiter: state.sub_delimiter
         }
         {
           [segment],

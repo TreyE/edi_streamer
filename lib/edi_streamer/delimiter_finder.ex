@@ -1,5 +1,5 @@
 defmodule EdiStreamer.DelimiterFinder do
-  @spec find_delimiters(any) :: {:ok, binary, binary} | {:error, term}
+  @spec find_delimiters(any) :: {:ok, binary, binary, binary, any} | {:error, term}
   def find_delimiters(io_thing) do
     rewound_io_thing = EdiStreamer.IoAble.rewind(io_thing)
     {new_io_thing, data} = EdiStreamer.IoAble.pread(rewound_io_thing, 3, 1)
@@ -17,9 +17,9 @@ defmodule EdiStreamer.DelimiterFinder do
     case data do
       :eof -> {:error, :eof}
       {:error, io_e} -> {:error, {:io_error, io_e}}
-      <<_::8, s_sep::binary>> -> 
+      <<sub_delimiter::binary-size(1), s_sep::binary>> -> 
         rewound_io_thing = EdiStreamer.IoAble.rewind(new_io_thing)
-        {:ok, f_sep, s_sep, rewound_io_thing}
+        {:ok, f_sep, s_sep, sub_delimiter, rewound_io_thing}
     end
   end
 

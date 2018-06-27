@@ -17,7 +17,7 @@ defmodule EdiStreamer.DelimiterFinder do
     case data do
       :eof -> {:error, :eof}
       {:error, io_e} -> {:error, {:io_error, io_e}}
-      <<sub_delimiter::binary-size(1), s_sep::binary>> -> 
+      <<sub_delimiter::binary-size(1), s_sep::binary>> ->
         rewound_io_thing = EdiStreamer.IoAble.rewind(new_io_thing)
         {:ok, f_sep, s_sep, sub_delimiter, rewound_io_thing}
     end
